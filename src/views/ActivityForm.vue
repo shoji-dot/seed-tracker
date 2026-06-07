@@ -173,7 +173,6 @@ const masters    = useMastersStore()
 const type    = computed(() => route.params.type || 'other')
 const typeDef = computed(() => ACTIVITY_TYPES[type.value] || ACTIVITY_TYPES.other)
 const isEdit  = computed(() => !!route.params.activityId)
-const seedId  = computed(() => Number(route.params.seedId))
 
 const saving     = ref(false)
 const loadingData= ref(false)
@@ -253,7 +252,6 @@ async function save() {
   errMsg.value = ''
   try {
     const payload = {
-      seed_id:  seedId.value,
       type:     type.value,
       date:     form.date || null,
       location: form.location,

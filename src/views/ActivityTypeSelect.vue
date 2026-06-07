@@ -5,11 +5,6 @@
       <h2>活動記録を追加</h2>
     </header>
 
-    <div class="seed-label">
-      <span class="seed-label-icon">🌱</span>
-      <span class="seed-label-title">{{ seedTitle }}</span>
-    </div>
-
     <p class="guide">活動の種別を選んでください</p>
 
     <div class="type-grid">
@@ -17,7 +12,7 @@
         v-for="(def, key) in ACTIVITY_TYPES"
         :key="key"
         class="type-card"
-        @click="goToForm(key)"
+        @click="router.push(`/activities/new/${key}`)"
       >
         <span class="type-icon">{{ def.icon }}</span>
         <span class="type-label">{{ def.label }}</span>
@@ -28,29 +23,10 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRouter } from 'vue-router'
 import { ACTIVITY_TYPES } from '../stores/activities.js'
-import { useSeedsStore } from '../stores/seeds.js'
 
-const route  = useRoute()
 const router = useRouter()
-const seeds  = useSeedsStore()
-
-const seedTitle = ref('読み込み中…')
-
-onMounted(async () => {
-  try {
-    const seed = await seeds.getSeed(route.params.seedId)
-    seedTitle.value = seed.title
-  } catch {
-    seedTitle.value = '不明なシード'
-  }
-})
-
-function goToForm(type) {
-  router.push(`/seeds/${route.params.seedId}/activities/new/${type}`)
-}
 </script>
 
 <style scoped>
@@ -64,15 +40,6 @@ function goToForm(type) {
 }
 .page-header h2 { font-size: 16px; font-weight: 700; }
 .btn-back { background: none; border: none; color: var(--accent); font-size: 18px; cursor: pointer; padding: 4px 8px; }
-
-.seed-label {
-  display: flex; align-items: center; gap: 8px;
-  margin: 16px 16px 0;
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 10px 14px;
-}
-.seed-label-icon { font-size: 16px; }
-.seed-label-title { font-size: 13px; color: var(--text2); flex: 1; }
 
 .guide {
   font-size: 13px; color: var(--text3);
