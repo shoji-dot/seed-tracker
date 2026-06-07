@@ -5,7 +5,7 @@ export async function migrate() {
   try {
     await client.query('BEGIN')
 
-    // 繝ｦ繝ｼ繧ｶ繝ｼ繝・・繝悶Ν
+    // ユーザーテーブル
     await client.query(`
       CREATE TABLE IF NOT EXISTS users (
         id          SERIAL PRIMARY KEY,
@@ -17,7 +17,7 @@ export async function migrate() {
       )
     `)
 
-    // 繧ｿ繧ｰ繝・・繝悶Ν
+    // タグテーブル
     await client.query(`
       CREATE TABLE IF NOT EXISTS tags (
         id         SERIAL PRIMARY KEY,
@@ -26,7 +26,7 @@ export async function migrate() {
       )
     `)
 
-    // 莠ｺ迚ｩ繝・・繝悶Ν
+    // 人物テーブル
     await client.query(`
       CREATE TABLE IF NOT EXISTS persons (
         id           SERIAL PRIMARY KEY,
@@ -41,7 +41,7 @@ export async function migrate() {
       )
     `)
 
-    // 莨∵･ｭ繝・・繝悶Ν
+    // 企業テーブル
     await client.query(`
       CREATE TABLE IF NOT EXISTS companies (
         id           SERIAL PRIMARY KEY,
@@ -56,12 +56,12 @@ export async function migrate() {
       )
     `)
 
-    // 繧ｷ繝ｼ繝峨ユ繝ｼ繝悶Ν
+    // シードテーブル
     await client.query(`
       CREATE TABLE IF NOT EXISTS seeds (
         id            SERIAL PRIMARY KEY,
         title         TEXT NOT NULL,
-        status        TEXT NOT NULL DEFAULT '隱ｲ鬘・,
+        status        TEXT NOT NULL DEFAULT 'kadai',
         description   TEXT DEFAULT '',
         source        TEXT DEFAULT '',
         source_date   DATE,
@@ -77,7 +77,7 @@ export async function migrate() {
       )
     `)
 
-    // 豢ｻ蜍戊ｨ倬鹸繝・・繝悶Ν
+    // 活動記録テーブル
     await client.query(`
       CREATE TABLE IF NOT EXISTS activities (
         id          SERIAL PRIMARY KEY,
@@ -91,7 +91,7 @@ export async function migrate() {
       )
     `)
 
-    // updated_at 閾ｪ蜍墓峩譁ｰ繝医Μ繧ｬ繝ｼ
+    // updated_at 自動更新トリガー
     await client.query(`
       CREATE OR REPLACE FUNCTION update_updated_at()
       RETURNS TRIGGER AS $$
@@ -112,13 +112,12 @@ export async function migrate() {
     }
 
     await client.query('COMMIT')
-    console.log('[migrate] 笨・All tables ready')
+    console.log('[migrate] All tables ready')
   } catch (err) {
     await client.query('ROLLBACK')
-    console.error('[migrate] 笨・Migration failed:', err)
+    console.error('[migrate] Migration failed:', err)
     throw err
   } finally {
     client.release()
   }
 }
-
