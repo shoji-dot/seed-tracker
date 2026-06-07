@@ -64,13 +64,13 @@ router.get('/:id', async (req, res) => {
 
 // POST /api/activities
 router.post('/', async (req, res) => {
-  const { seed_id, type, date, location, summary, detail } = req.body
-  if (!seed_id || !type) return res.status(400).json({ error: 'seed_id and type required' })
+  const { type, date, location, summary, detail } = req.body
+  if (!type) return res.status(400).json({ error: 'type required' })
   try {
     const { rows } = await pool.query(
-      `INSERT INTO activities (seed_id, type, date, location, summary, detail, created_by)
-       VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
-      [seed_id, type, date || null, location || '', summary || '', JSON.stringify(detail || {}), req.user.id]
+      `INSERT INTO activities (type, date, location, summary, detail, created_by)
+       VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
+      [type, date || null, location || '', summary || '', JSON.stringify(detail || {}), req.user.id]
     )
     res.status(201).json(rows[0])
   } catch (err) {

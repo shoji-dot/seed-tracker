@@ -81,7 +81,6 @@ export async function migrate() {
     await client.query(`
       CREATE TABLE IF NOT EXISTS activities (
         id          SERIAL PRIMARY KEY,
-        seed_id     INTEGER REFERENCES seeds(id) ON DELETE SET NULL,
         type        TEXT NOT NULL CHECK (type IN ('surgery','meeting','event','other')),
         date        DATE,
         location    TEXT DEFAULT '',

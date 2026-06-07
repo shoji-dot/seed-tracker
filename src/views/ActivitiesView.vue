@@ -2,7 +2,7 @@
   <div class="page">
     <header class="top-bar">
       <h1>🏥 活動記録</h1>
-      <button class="btn-add" @click="router.push('/activities/new')">＋ 追加</button>
+      <button class="btn-add" @click="router.push('/activities/select')">＋ 追加</button>
     </header>
 
     <div class="filter-bar">
