@@ -1,11 +1,11 @@
-import pool from './db.js'
+﻿import pool from './db.js'
 
 export async function migrate() {
   const client = await pool.connect()
   try {
     await client.query('BEGIN')
 
-    // ユーザーテーブル
+    // 繝ｦ繝ｼ繧ｶ繝ｼ繝・・繝悶Ν
     await client.query(`
       CREATE TABLE IF NOT EXISTS users (
         id          SERIAL PRIMARY KEY,
@@ -17,7 +17,7 @@ export async function migrate() {
       )
     `)
 
-    // タグテーブル
+    // 繧ｿ繧ｰ繝・・繝悶Ν
     await client.query(`
       CREATE TABLE IF NOT EXISTS tags (
         id         SERIAL PRIMARY KEY,
@@ -26,7 +26,7 @@ export async function migrate() {
       )
     `)
 
-    // 人物テーブル
+    // 莠ｺ迚ｩ繝・・繝悶Ν
     await client.query(`
       CREATE TABLE IF NOT EXISTS persons (
         id           SERIAL PRIMARY KEY,
@@ -41,7 +41,7 @@ export async function migrate() {
       )
     `)
 
-    // 企業テーブル
+    // 莨∵･ｭ繝・・繝悶Ν
     await client.query(`
       CREATE TABLE IF NOT EXISTS companies (
         id           SERIAL PRIMARY KEY,
@@ -56,12 +56,12 @@ export async function migrate() {
       )
     `)
 
-    // シードテーブル
+    // 繧ｷ繝ｼ繝峨ユ繝ｼ繝悶Ν
     await client.query(`
       CREATE TABLE IF NOT EXISTS seeds (
         id            SERIAL PRIMARY KEY,
         title         TEXT NOT NULL,
-        status        TEXT NOT NULL DEFAULT '課題',
+        status        TEXT NOT NULL DEFAULT '隱ｲ鬘・,
         description   TEXT DEFAULT '',
         source        TEXT DEFAULT '',
         source_date   DATE,
@@ -77,11 +77,11 @@ export async function migrate() {
       )
     `)
 
-    // 活動記録テーブル
+    // 豢ｻ蜍戊ｨ倬鹸繝・・繝悶Ν
     await client.query(`
       CREATE TABLE IF NOT EXISTS activities (
         id          SERIAL PRIMARY KEY,
-        seed_id     INTEGER NOT NULL REFERENCES seeds(id) ON DELETE CASCADE,
+        seed_id     INTEGER REFERENCES seeds(id) ON DELETE SET NULL,
         type        TEXT NOT NULL CHECK (type IN ('surgery','meeting','event','other')),
         date        DATE,
         location    TEXT DEFAULT '',
@@ -92,7 +92,7 @@ export async function migrate() {
       )
     `)
 
-    // updated_at 自動更新トリガー
+    // updated_at 閾ｪ蜍墓峩譁ｰ繝医Μ繧ｬ繝ｼ
     await client.query(`
       CREATE OR REPLACE FUNCTION update_updated_at()
       RETURNS TRIGGER AS $$
@@ -113,12 +113,13 @@ export async function migrate() {
     }
 
     await client.query('COMMIT')
-    console.log('[migrate] ✓ All tables ready')
+    console.log('[migrate] 笨・All tables ready')
   } catch (err) {
     await client.query('ROLLBACK')
-    console.error('[migrate] ✗ Migration failed:', err)
+    console.error('[migrate] 笨・Migration failed:', err)
     throw err
   } finally {
     client.release()
   }
 }
+

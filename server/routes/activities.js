@@ -1,11 +1,11 @@
-import { Router } from 'express'
+﻿import { Router } from 'express'
 import pool from '../db.js'
 import { authMiddleware } from './auth.js'
 
 const router = Router()
 router.use(authMiddleware)
 
-// GET /api/activities/all  — 全件 + seed_title付き
+// GET /api/activities/all  窶・蜈ｨ莉ｶ + seed_title莉倥″
 router.get('/all', async (req, res) => {
   try {
     const { rows } = await pool.query(`
@@ -106,3 +106,4 @@ router.delete('/:id', async (req, res) => {
 })
 
 export default router
+
