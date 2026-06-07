@@ -1,0 +1,8 @@
+# Railway は GitHub 連携で自動デプロイされるため
+# このファイルは参考用です（Railway側で設定すれば不要）
+name: Deploy to Railway
+on:
+  push:
+    branches: [main]
+# Railway の GitHub Integration を使う場合はこのファイル不要
+# Railway ダッシュボード → Settings → Source → GitHub で連携するだけ
