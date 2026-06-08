@@ -56,6 +56,32 @@
         <textarea v-model="form.summary" rows="3" :placeholder="summaryPlaceholder"></textarea>
       </div>
 
+      <div class="field">
+        <label>タグ</label>
+        <div class="tag-input-wrap">
+          <div class="tag-chips">
+            <span v-for="tag in form.tags" :key="tag" class="chip">
+              {{ tag }}
+              <button type="button" @click="removeTag(tag)">×</button>
+            </span>
+          </div>
+          <div class="inline-add">
+            <input v-model="tagInput" @keydown.enter.prevent="addTag"
+                   placeholder="タグを入力…" list="tag-list" />
+            <datalist id="tag-list">
+              <option v-for="t in masters.tags" :key="t.id" :value="t.name" />
+            </datalist>
+            <button type="button" @click="addTag">追加</button>
+          </div>
+        </div>
+        <div v-if="suggestedTags.length" class="suggest-row">
+          <span class="suggest-label">候補:</span>
+          <button v-for="t in suggestedTags" :key="t" type="button" class="chip-suggest" @click="addSuggestedTag(t)">
+            ＋ {{ t }}
+          </button>
+        </div>
+      </div>
+
       <!-- 手術記録専用 -->
       <template v-if="type === 'surgery'">
         <div class="section-title">🔪 手術情報</div>
@@ -207,6 +233,7 @@ const form = reactive({
   date:    '',
   location:'',
   summary: '',
+  tags:    [],
   seed_id: null,
   detail:  makeDefaultDetail('other'),
 })
@@ -233,6 +260,35 @@ const summaryPlaceholder = computed(() => ({
 }[type.value] || ''))
 
 const personName = (id) => masters.persons.find(p => p.id === Number(id))?.name || String(id)
+
+const tagInput = ref('')
+function addTag() {
+  const t = tagInput.value.trim()
+  if (t && !form.tags.includes(t)) {
+    form.tags.push(t)
+    masters.addTag(t).catch(() => {})
+  }
+  tagInput.value = ''
+}
+function removeTag(t) { form.tags = form.tags.filter(x => x !== t) }
+function addSuggestedTag(t) {
+  if (!form.tags.includes(t)) form.tags.push(t)
+}
+
+// 概要・詳細欄のテキストを集約し、既存タグ名が含まれていれば候補として提示する
+function collectText(val, acc = []) {
+  if (typeof val === 'string') acc.push(val)
+  else if (Array.isArray(val)) val.forEach(v => collectText(v, acc))
+  else if (val && typeof val === 'object') Object.values(val).forEach(v => collectText(v, acc))
+  return acc
+}
+const suggestedTags = computed(() => {
+  const text = [form.summary, ...collectText(form.detail)].join('\n')
+  if (!text.trim()) return []
+  return masters.tags
+    .map(t => t.name)
+    .filter(name => name && text.includes(name) && !form.tags.includes(name))
+})
 
 // 新規入力された施設名・機器カテゴリを自動でマスタへ登録（重複は無視）
 function registerNewMasterValues() {
@@ -318,6 +374,7 @@ onMounted(async () => {
       form.date     = act.date ? act.date.split('T')[0] : ''
       form.location = act.location || ''
       form.summary  = act.summary  || ''
+      form.tags     = act.tags     || []
       form.seed_id  = act.seed_id  || null
       form.detail   = { ...makeDefaultDetail(type.value), ...(act.detail || {}) }
     } finally {
@@ -336,6 +393,7 @@ async function save() {
       date:     form.date || null,
       location: form.location,
       summary:  form.summary,
+      tags:     form.tags,
       seed_id:  form.seed_id || null,
       detail:   form.detail,
     }
@@ -411,7 +469,14 @@ async function deleteActivity() {
   border-radius: var(--radius-s); color: var(--text3); font-size: 13px;
   padding: 10px; cursor: pointer; text-align: center;
 }
-.rel-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.rel-chips, .tag-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.tag-input-wrap .inline-add { display: flex; gap: 6px; }
+.tag-input-wrap .inline-add input { flex: 1; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-s); color: var(--text); font-size: 14px; padding: 9px 11px; }
+.tag-input-wrap .inline-add button { background: var(--surface3); border: 1px solid var(--border); border-radius: var(--radius-s); color: var(--text2); font-size: 13px; padding: 8px 12px; cursor: pointer; white-space: nowrap; }
+.suggest-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 8px; }
+.suggest-label { font-size: 11px; color: var(--text3); }
+.chip-suggest { background: none; border: 1px dashed var(--border2); color: var(--text2); border-radius: 20px; font-size: 12px; padding: 3px 9px; cursor: pointer; }
+.chip-suggest:hover { border-color: var(--accent); color: var(--accent); }
 .chip { display: inline-flex; align-items: center; gap: 4px; background: var(--surface3); border: 1px solid var(--border2); border-radius: 20px; font-size: 12px; color: var(--text); padding: 3px 8px; }
 .chip button { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 14px; line-height: 1; }
 .chip-person { border-color: var(--accent-g); }

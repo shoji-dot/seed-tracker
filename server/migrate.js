@@ -108,6 +108,7 @@ export async function migrate() {
         created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
       )
     `)
+    await client.query(`ALTER TABLE activities ADD COLUMN IF NOT EXISTS tags TEXT[] DEFAULT '{}'`)
 
     // updated_at 自動更新トリガー
     await client.query(`
