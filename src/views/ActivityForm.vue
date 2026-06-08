@@ -15,6 +15,9 @@
 
     <form v-else class="form-body" @submit.prevent="save">
       <p v-if="errMsg" class="err">{{ errMsg }}</p>
+      <datalist id="equipment-categories-list">
+        <option v-for="c in masters.equipmentCategories" :key="c.id" :value="c.name" />
+      </datalist>
 
       <!-- 関連シード -->
       <div class="field">
@@ -37,8 +40,12 @@
       </div>
 
       <div class="field">
-        <label>場所</label>
-        <input v-model="form.location" :placeholder="locationPlaceholder" />
+        <label>場所（施設名）</label>
+        <input v-model="form.location" list="facilities-list" :placeholder="locationPlaceholder" />
+        <datalist id="facilities-list">
+          <option v-for="f in masters.facilities" :key="f.id" :value="f.name" />
+        </datalist>
+        <p class="hint-sm">候補から選ぶか、新しい施設名を入力してください（自動的に候補へ登録されます）</p>
       </div>
 
       <div class="field">
@@ -77,7 +84,7 @@
           <div class="instrument-fields">
             <input v-model="item.name"     placeholder="機器名"   class="inst-name" />
             <input v-model="item.maker"    placeholder="メーカー" class="inst-maker" />
-            <input v-model="item.category" placeholder="カテゴリ" class="inst-cat" />
+            <input v-model="item.category" list="equipment-categories-list" placeholder="カテゴリ" class="inst-cat" />
           </div>
           <input v-model="item.note" placeholder="使用メモ（設定値など）" class="inst-note" />
           <button type="button" class="btn-remove-inst" @click="removeInstrument(i)">削除</button>
@@ -122,7 +129,7 @@
           <div class="instrument-fields">
             <input v-model="item.name"     placeholder="機器名"   class="inst-name" />
             <input v-model="item.maker"    placeholder="メーカー" class="inst-maker" />
-            <input v-model="item.category" placeholder="カテゴリ" class="inst-cat" />
+            <input v-model="item.category" list="equipment-categories-list" placeholder="カテゴリ" class="inst-cat" />
           </div>
           <input v-model="item.note" placeholder="詳細メモ" class="inst-note" />
           <button type="button" class="btn-remove-inst" @click="removeInstrument(i)">削除</button>
@@ -224,6 +231,20 @@ const summaryPlaceholder = computed(() => ({
 
 const personName = (id) => masters.persons.find(p => p.id === Number(id))?.name || String(id)
 
+// 新規入力された施設名・機器カテゴリを自動でマスタへ登録（重複は無視）
+function registerNewMasterValues() {
+  const loc = (form.location || '').trim()
+  if (loc && !masters.facilities.some(f => f.name === loc)) {
+    masters.addFacility(loc).catch(() => {})
+  }
+  const cats = (form.detail.instruments || []).map(i => (i.category || '').trim()).filter(Boolean)
+  for (const cat of cats) {
+    if (!masters.equipmentCategories.some(c => c.name === cat)) {
+      masters.addEquipmentCategory(cat).catch(() => {})
+    }
+  }
+}
+
 function addInstrument() { form.detail.instruments.push({ name:'', maker:'', category:'', note:'' }) }
 function removeInstrument(i) { form.detail.instruments.splice(i, 1) }
 
@@ -283,6 +304,7 @@ async function save() {
     } else {
       await activities.addActivity(payload)
     }
+    registerNewMasterValues()
     router.back()
   } catch(e) {
     errMsg.value = e.message
@@ -322,6 +344,7 @@ async function deleteActivity() {
 .field label { display: block; font-size: 12px; color: var(--text2); margin-bottom: 6px; }
 .req { color: var(--accent-r); }
 .opt { font-weight: 400; color: var(--text3); margin-left: 4px; }
+.hint-sm { font-size: 11px; color: var(--text3); margin-top: 6px; }
 .field input, .field textarea, .field select {
   width: 100%; background: var(--surface2); border: 1px solid var(--border);
   border-radius: var(--radius-s); color: var(--text); font-size: 14px; padding: 10px 12px;

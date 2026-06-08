@@ -30,6 +30,56 @@ router.delete('/tags/:id', async (req, res) => {
   res.json({ success: true })
 })
 
+// ===== FACILITIES =====
+router.get('/facilities', async (req, res) => {
+  const { rows } = await pool.query('SELECT * FROM facilities ORDER BY name')
+  res.json(rows)
+})
+
+router.post('/facilities', async (req, res) => {
+  const { name } = req.body
+  if (!name || !name.trim()) return res.status(400).json({ error: 'name required' })
+  try {
+    const { rows } = await pool.query(
+      'INSERT INTO facilities (name) VALUES ($1) ON CONFLICT (name) DO UPDATE SET name=EXCLUDED.name RETURNING *',
+      [name.trim()]
+    )
+    res.json(rows[0])
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
+router.delete('/facilities/:id', async (req, res) => {
+  await pool.query('DELETE FROM facilities WHERE id=$1', [req.params.id])
+  res.json({ success: true })
+})
+
+// ===== EQUIPMENT CATEGORIES =====
+router.get('/equipment-categories', async (req, res) => {
+  const { rows } = await pool.query('SELECT * FROM equipment_categories ORDER BY name')
+  res.json(rows)
+})
+
+router.post('/equipment-categories', async (req, res) => {
+  const { name } = req.body
+  if (!name || !name.trim()) return res.status(400).json({ error: 'name required' })
+  try {
+    const { rows } = await pool.query(
+      'INSERT INTO equipment_categories (name) VALUES ($1) ON CONFLICT (name) DO UPDATE SET name=EXCLUDED.name RETURNING *',
+      [name.trim()]
+    )
+    res.json(rows[0])
+  } catch (err) {
+    res.status(500).json({ error: 'Server error' })
+  }
+})
+
+router.delete('/equipment-categories/:id', async (req, res) => {
+  await pool.query('DELETE FROM equipment_categories WHERE id=$1', [req.params.id])
+  res.json({ success: true })
+})
+
 // ===== PERSONS =====
 router.get('/persons', async (req, res) => {
   const { rows } = await pool.query('SELECT * FROM persons ORDER BY name')

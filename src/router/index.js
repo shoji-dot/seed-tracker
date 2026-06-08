@@ -12,6 +12,8 @@ const routes = [
   { path: '/activities/:activityId/edit/:type', name: 'activity-edit', component: () => import('../views/ActivityForm.vue') },
   { path: '/persons',   name: 'persons',   component: () => import('../views/PersonsView.vue') },
   { path: '/companies', name: 'companies', component: () => import('../views/CompaniesView.vue') },
+  { path: '/facilities', name: 'facilities', component: () => import('../views/FacilitiesView.vue') },
+  { path: '/equipment-categories', name: 'equipment-categories', component: () => import('../views/EquipmentCategoriesView.vue') },
   { path: '/settings',  name: 'settings',  component: () => import('../views/SettingsView.vue') },
   { path: '/:pathMatch(.*)*', redirect: '/' },
 ]

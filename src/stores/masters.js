@@ -6,16 +6,46 @@ export const useMastersStore = defineStore('masters', () => {
   const tags      = ref([])
   const persons   = ref([])
   const companies = ref([])
+  const facilities = ref([])
+  const equipmentCategories = ref([])
 
   async function fetchAll() {
-    const [t, p, c] = await Promise.all([
+    const [t, p, c, f, e] = await Promise.all([
       api.get('/masters/tags'),
       api.get('/masters/persons'),
       api.get('/masters/companies'),
+      api.get('/masters/facilities'),
+      api.get('/masters/equipment-categories'),
     ])
     tags.value      = t
     persons.value   = p
     companies.value = c
+    facilities.value = f
+    equipmentCategories.value = e
+  }
+
+  // Facilities
+  async function addFacility(name) {
+    const f = await api.post('/masters/facilities', { name })
+    if (!facilities.value.find(x => x.id === f.id)) facilities.value.push(f)
+    facilities.value.sort((a, b) => a.name.localeCompare(b.name, 'ja'))
+    return f
+  }
+  async function deleteFacility(id) {
+    await api.delete(`/masters/facilities/${id}`)
+    facilities.value = facilities.value.filter(x => x.id !== id)
+  }
+
+  // Equipment categories
+  async function addEquipmentCategory(name) {
+    const c = await api.post('/masters/equipment-categories', { name })
+    if (!equipmentCategories.value.find(x => x.id === c.id)) equipmentCategories.value.push(c)
+    equipmentCategories.value.sort((a, b) => a.name.localeCompare(b.name, 'ja'))
+    return c
+  }
+  async function deleteEquipmentCategory(id) {
+    await api.delete(`/masters/equipment-categories/${id}`)
+    equipmentCategories.value = equipmentCategories.value.filter(x => x.id !== id)
   }
 
   // Tags
@@ -64,9 +94,11 @@ export const useMastersStore = defineStore('masters', () => {
   }
 
   return {
-    tags, persons, companies, fetchAll,
+    tags, persons, companies, facilities, equipmentCategories, fetchAll,
     addTag, deleteTag,
     addPerson, updatePerson, deletePerson,
     addCompany, updateCompany, deleteCompany,
+    addFacility, deleteFacility,
+    addEquipmentCategory, deleteEquipmentCategory,
   }
 })

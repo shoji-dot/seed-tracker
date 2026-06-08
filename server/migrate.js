@@ -26,6 +26,24 @@ export async function migrate() {
       )
     `)
 
+    // 施設名マスタ
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS facilities (
+        id         SERIAL PRIMARY KEY,
+        name       TEXT UNIQUE NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `)
+
+    // 使用機器カテゴリマスタ
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS equipment_categories (
+        id         SERIAL PRIMARY KEY,
+        name       TEXT UNIQUE NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `)
+
     // 人物テーブル
     await client.query(`
       CREATE TABLE IF NOT EXISTS persons (

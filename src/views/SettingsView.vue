@@ -55,6 +55,18 @@
       </table>
     </section>
 
+    <!-- マスタ管理 -->
+    <section class="card">
+      <h3>マスタ管理</h3>
+      <p class="hint">活動記録で使う選択肢（施設名・機器カテゴリ）を管理します</p>
+      <div class="master-links">
+        <button class="btn-secondary" @click="router.push('/facilities')">🏥 施設名マスタ</button>
+        <button class="btn-secondary" @click="router.push('/equipment-categories')">🔧 機器カテゴリマスタ</button>
+        <button class="btn-secondary" @click="router.push('/persons')">👤 人物マスタ</button>
+        <button class="btn-secondary" @click="router.push('/companies')">🏢 企業マスタ</button>
+      </div>
+    </section>
+
     <!-- CSVエクスポート -->
     <section class="card">
       <h3>データエクスポート</h3>
@@ -122,6 +134,8 @@ function doLogout() {
 .badge-member { background: var(--surface3); color: var(--text2); font-size: 11px; padding: 2px 8px; border-radius: 20px; }
 .btn-logout   { width: 100%; margin-top: 14px; background: none; border: 1px solid var(--accent-r); color: var(--accent-r); border-radius: var(--radius-s); padding: 10px; cursor: pointer; font-size: 14px; }
 .btn-secondary { background: var(--surface2); border: 1px solid var(--border); color: var(--text); border-radius: var(--radius-s); padding: 10px 16px; cursor: pointer; font-size: 14px; }
+.master-links { display: flex; flex-direction: column; gap: 8px; }
+.master-links .btn-secondary { text-align: left; }
 
 .admin-secret-box { display: flex; align-items: center; gap: 10px; background: var(--surface2); border-radius: var(--radius-s); padding: 10px 12px; margin-bottom: 14px; flex-wrap: wrap; }
 .secret { font-family: monospace; font-size: 14px; color: var(--accent-w); cursor: pointer; user-select: none; }
