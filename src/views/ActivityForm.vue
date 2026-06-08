@@ -18,6 +18,9 @@
       <datalist id="equipment-categories-list">
         <option v-for="c in masters.equipmentCategories" :key="c.id" :value="c.name" />
       </datalist>
+      <datalist id="persons-list">
+        <option v-for="p in masters.persons" :key="p.id" :value="p.name" />
+      </datalist>
 
       <!-- 関連シード -->
       <div class="field">
@@ -72,12 +75,12 @@
               <button type="button" @click="removeSurgeon(id)">×</button>
             </span>
           </div>
-          <select @change="addSurgeon($event.target.value); $event.target.value=''" class="rel-select">
-            <option value="">術者を追加…</option>
-            <option v-for="p in masters.persons" :key="p.id" :value="p.id">
-              {{ p.name }}{{ p.affiliation ? ` / ${p.affiliation}` : '' }}
-            </option>
-          </select>
+          <div class="add-person-row">
+            <input v-model="surgeonInput" list="persons-list" placeholder="氏名を入力（候補から選択も可）"
+                   @keyup.enter="commitSurgeonInput" />
+            <button type="button" class="btn-add-person" @click="commitSurgeonInput">追加</button>
+          </div>
+          <p class="hint-sm">候補にない氏名は新しい人物として自動登録されます</p>
         </div>
         <div class="section-title">🔧 使用機器</div>
         <div v-for="(item, i) in form.detail.instruments" :key="i" class="instrument-row">
@@ -112,12 +115,12 @@
               <button type="button" @click="removeMeetingPerson(id)">×</button>
             </span>
           </div>
-          <select @change="addMeetingPerson($event.target.value); $event.target.value=''" class="rel-select">
-            <option value="">面談相手を追加…</option>
-            <option v-for="p in masters.persons" :key="p.id" :value="p.id">
-              {{ p.name }}{{ p.affiliation ? ` / ${p.affiliation}` : '' }}
-            </option>
-          </select>
+          <div class="add-person-row">
+            <input v-model="meetingPersonInput" list="persons-list" placeholder="氏名を入力（候補から選択も可）"
+                   @keyup.enter="commitMeetingPersonInput" />
+            <button type="button" class="btn-add-person" @click="commitMeetingPersonInput">追加</button>
+          </div>
+          <p class="hint-sm">候補にない氏名は新しい人物として自動登録されます</p>
         </div>
         <div class="field">
           <label>ヒアリング内容</label>
@@ -248,17 +251,54 @@ function registerNewMasterValues() {
 function addInstrument() { form.detail.instruments.push({ name:'', maker:'', category:'', note:'' }) }
 function removeInstrument(i) { form.detail.instruments.splice(i, 1) }
 
+const surgeonInput        = ref('')
+const meetingPersonInput  = ref('')
+
+// 氏名から人物IDを取得。未登録なら新規作成して登録する（表記ゆれ防止のため完全一致で照合）
+async function resolvePersonIdByName(rawName) {
+  const name = rawName.trim()
+  if (!name) return null
+  const existing = masters.persons.find(p => p.name === name)
+  if (existing) return existing.id
+  const created = await masters.addPerson({ name })
+  return created.id
+}
+
 function addSurgeon(id) {
   const n = Number(id)
   if (n && !form.detail.surgeon_ids.includes(n)) form.detail.surgeon_ids.push(n)
 }
 function removeSurgeon(id) { form.detail.surgeon_ids = form.detail.surgeon_ids.filter(x => x !== id) }
 
+async function commitSurgeonInput() {
+  const name = surgeonInput.value.trim()
+  if (!name) return
+  try {
+    const id = await resolvePersonIdByName(name)
+    addSurgeon(id)
+    surgeonInput.value = ''
+  } catch (e) {
+    errMsg.value = '人物の登録に失敗しました'
+  }
+}
+
 function addMeetingPerson(id) {
   const n = Number(id)
   if (n && !form.detail.person_ids.includes(n)) form.detail.person_ids.push(n)
 }
 function removeMeetingPerson(id) { form.detail.person_ids = form.detail.person_ids.filter(x => x !== id) }
+
+async function commitMeetingPersonInput() {
+  const name = meetingPersonInput.value.trim()
+  if (!name) return
+  try {
+    const id = await resolvePersonIdByName(name)
+    addMeetingPerson(id)
+    meetingPersonInput.value = ''
+  } catch (e) {
+    errMsg.value = '人物の登録に失敗しました'
+  }
+}
 
 onMounted(async () => {
   form.detail = makeDefaultDetail(type.value)
@@ -376,6 +416,9 @@ async function deleteActivity() {
 .chip button { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 14px; line-height: 1; }
 .chip-person { border-color: var(--accent-g); }
 .rel-select { width: 100%; font-size: 13px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-s); color: var(--text); padding: 9px 11px; }
+.add-person-row { display: flex; gap: 8px; }
+.add-person-row input { flex: 1; font-size: 13px; background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-s); color: var(--text); padding: 9px 11px; }
+.btn-add-person { background: var(--accent); border: none; color: #fff; border-radius: var(--radius-s); padding: 0 16px; font-size: 13px; font-weight: 600; cursor: pointer; }
 .danger-zone { border-top: 1px solid var(--border); padding-top: 20px; }
 .btn-delete { width: 100%; background: none; border: 1px solid var(--accent-r); color: var(--accent-r); border-radius: var(--radius-s); padding: 10px; cursor: pointer; font-size: 14px; }
 </style>
