@@ -64,13 +64,13 @@ router.get('/:id', async (req, res) => {
 
 // POST /api/activities
 router.post('/', async (req, res) => {
-  const { type, date, location, summary, detail } = req.body
+  const { type, date, location, summary, detail, seed_id } = req.body
   if (!type) return res.status(400).json({ error: 'type required' })
   try {
     const { rows } = await pool.query(
-      `INSERT INTO activities (type, date, location, summary, detail, created_by)
-       VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
-      [type, date || null, location || '', summary || '', JSON.stringify(detail || {}), req.user.id]
+      `INSERT INTO activities (type, date, location, summary, detail, seed_id, created_by)
+       VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
+      [type, date || null, location || '', summary || '', JSON.stringify(detail || {}), seed_id || null, req.user.id]
     )
     res.status(201).json(rows[0])
   } catch (err) {
@@ -81,12 +81,12 @@ router.post('/', async (req, res) => {
 
 // PUT /api/activities/:id
 router.put('/:id', async (req, res) => {
-  const { type, date, location, summary, detail } = req.body
+  const { type, date, location, summary, detail, seed_id } = req.body
   try {
     const { rows } = await pool.query(
-      `UPDATE activities SET type=$1, date=$2, location=$3, summary=$4, detail=$5
-       WHERE id=$6 RETURNING *`,
-      [type, date || null, location || '', summary || '', JSON.stringify(detail || {}), req.params.id]
+      `UPDATE activities SET type=$1, date=$2, location=$3, summary=$4, detail=$5, seed_id=$6
+       WHERE id=$7 RETURNING *`,
+      [type, date || null, location || '', summary || '', JSON.stringify(detail || {}), seed_id || null, req.params.id]
     )
     if (!rows[0]) return res.status(404).json({ error: 'Not found' })
     res.json(rows[0])

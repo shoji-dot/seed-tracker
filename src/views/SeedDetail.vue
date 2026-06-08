@@ -71,7 +71,7 @@
       <section class="section">
         <div class="section-head">
           <h3 class="section-title">活動記録</h3>
-          <router-link :to="`/seeds/${seed.id}/activities/select`" class="btn-add-activity">
+          <router-link :to="{ path: '/activities/select', query: { seed_id: seed.id } }" class="btn-add-activity">
             ＋ 追加
           </router-link>
         </div>
