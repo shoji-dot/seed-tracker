@@ -71,4 +71,3 @@ async function remove(id) {
 .item-name { font-size: 14px; color: var(--text); }
 .item-card .del { background: var(--surface2); border: 1px solid var(--accent-r); color: var(--accent-r); border-radius: var(--radius-s); font-size: 12px; padding: 4px 10px; cursor: pointer; }
 </style>
-</content>
